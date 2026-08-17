@@ -16,6 +16,7 @@ export async function runAuthCommand(opts: {
   logger.info({ profileDir: getProfileDir() }, 'Opening browser for manual authentication');
   logger.info('Complete sign-in, MFA, and SSO in the browser window. Close the window when done.');
 
+  await browser.acquireProfileLock();
   await browser.launch();
 
   try {

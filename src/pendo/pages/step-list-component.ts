@@ -215,6 +215,13 @@ export class StepListComponent {
    * a master not yet processed. The resulting step order is always grouped by type — see
    * computeStepMapping for the exact resulting layout and its limitations.
    *
+   * Idempotent by design: on `--resume` after a failure partway through this method, the
+   * live step layout may already be partially shaped. Counts of existing image/video/
+   * text-only steps are read up front (via page-wide block selectors, not per-step
+   * position, so they stay accurate no matter what the calls below do to positions) and
+   * only the remaining delta is duplicated or deleted — re-running the full target counts
+   * unconditionally would duplicate or delete the wrong steps on a resumed run.
+   *
    * Callers are expected to verify the result via assertStepCount() with the real release
    * ID (see release-orchestrator.ts) — this method doesn't self-check, so a mismatch is
    * reported with proper traceability instead of a duplicate check with an empty releaseId.
@@ -222,21 +229,29 @@ export class StepListComponent {
   async shapeFeatureSteps(features: ReleaseManifest['features']): Promise<void> {
     const { MASTER_FEATURE_INDEX, MASTER_IMAGE_INDEX, MASTER_VIDEO_INDEX } = UI_CONTRACT.STEP_ORDER;
 
-    const countByType = (type: ReleaseManifest['features'][number]['media']['type']) =>
+    const neededByType = (type: ReleaseManifest['features'][number]['media']['type']) =>
       features.filter((f) => f.media.type === type).length;
 
+    const currentImageCount = await this.page.locator(SELECTORS.editor.editImageBlockButton).count();
+    const currentVideoCount = await this.page.locator(SELECTORS.editor.editVideoBlockButton).count();
+    const currentTotal = await this.getStepCount();
+    const currentTextCount = currentTotal - currentImageCount - currentVideoCount - 2; // - Intro - Outro
+
     // 1-based step numbers, matching "Duplicate step N" / "Delete step N" aria-labels.
-    await this.shapeMasterStep(MASTER_VIDEO_INDEX + 1, countByType('video'));
-    await this.shapeMasterStep(MASTER_IMAGE_INDEX + 1, countByType('image'));
-    await this.shapeMasterStep(MASTER_FEATURE_INDEX + 1, countByType('none'));
+    await this.shapeMasterStep(MASTER_VIDEO_INDEX + 1, neededByType('video'), currentVideoCount);
+    await this.shapeMasterStep(MASTER_IMAGE_INDEX + 1, neededByType('image'), currentImageCount);
+    await this.shapeMasterStep(MASTER_FEATURE_INDEX + 1, neededByType('none'), currentTextCount);
   }
 
-  private async shapeMasterStep(oneBasedStepNumber: number, neededCount: number): Promise<void> {
+  private async shapeMasterStep(oneBasedStepNumber: number, neededCount: number, currentCount: number): Promise<void> {
     if (neededCount === 0) {
-      await this.deleteStep(oneBasedStepNumber);
+      if (currentCount > 0) {
+        await this.deleteStep(oneBasedStepNumber);
+      }
       return;
     }
-    for (let i = 0; i < neededCount - 1; i++) {
+    const toDuplicate = Math.max(0, neededCount - currentCount);
+    for (let i = 0; i < toDuplicate; i++) {
       await this.duplicateStep(oneBasedStepNumber);
     }
   }

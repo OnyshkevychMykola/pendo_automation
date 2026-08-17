@@ -84,6 +84,7 @@ export async function createReleaseGuide(ctx: WorkflowContext): Promise<RunSumma
       logger.info(`Cloning template as "${validated.generatedGuideName}"...`);
       const clonedUrl = await detailsPage.cloneWithName(validated.generatedGuideName);
       journal.recordClone({ guideUrl: clonedUrl });
+      journal.completePhase('cloned');
       await artifacts.screenshot(page, 'cloned-guide');
       logger.info({ guideUrl: clonedUrl }, 'Cloned guide');
     }
