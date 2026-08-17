@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.idea/
+.vscode/
+.qodo/
+artifacts/**
+!artifacts/.gitkeep
+state/run-journal/**
+!state/run-journal/.gitkeep
+state/locks/**
+!state/locks/.gitkeep
+playwright-report/
+test-results/
+.env
+*.log
+pendo-automation.config.json
+
+# Release manifests are specific to each release and not meant to be committed —
+# keep only the documented example.
+releases/*
+!releases/example-release/

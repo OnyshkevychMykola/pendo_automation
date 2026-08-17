@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "region": "us",
+  "baseUrl": "https://app.pendo.io",
+  "targetAppName": "YOUR_APP_NAME",
+  "templateGuideName": "Release Notes Template",
+  "templateGuideUrl": "https://app.pendo.io/s/YOUR_SITE_ID/guides/YOUR_TEMPLATE_GUIDE_ID",
+  "templateVersion": 1,
+  "expectedPageName": "YOUR_TARGET_PAGE_NAME",
+  "browser": {
+    "channel": "chrome",
+    "headed": true,
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "slowMoMs": 0,
+    "defaultTimeoutMs": 15000,
+    "navigationTimeoutMs": 45000
+  },
+  "paths": {
+    "artifactsRoot": "./artifacts",
+    "stateRoot": "./state"
+  }
+}

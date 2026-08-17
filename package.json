@@ -1,0 +1,41 @@
+{
+  "name": "pendo-release-automation",
+  "version": "1.0.0",
+  "description": "Automates creation of Pendo release-note guides from structured JSON manifests",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "pendo:auth": "tsx src/cli.ts pendo:auth",
+    "pendo:doctor": "tsx src/cli.ts pendo:doctor",
+    "release:validate": "tsx src/cli.ts release:validate",
+    "release:create": "tsx src/cli.ts release:create",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0",
+    "zod": "^3.23.8",
+    "commander": "^12.1.0",
+    "pino": "^9.4.0",
+    "pino-pretty": "^11.3.0",
+    "env-paths": "^3.0.0",
+    "proper-lockfile": "^4.1.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2",
+    "tsx": "^4.19.1",
+    "vitest": "^2.1.1",
+    "@types/node": "^22.7.4",
+    "@types/proper-lockfile": "^4.1.4",
+    "eslint": "^9.11.1",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "prettier": "^3.3.3"
+  }
+}
