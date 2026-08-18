@@ -1,0 +1,13 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "pendo-release-guide",
+  "version": "0.1.0",
+  "description": "Creates a Draft Pendo release-note guide from manually prepared guide content by cloning a configured template and populating it through the live Pendo web UI. Phase 1: no release analysis, no publishing.",
+  "author": {
+    "name": "Arcadia",
+    "email": "mykola.onyshkevych@arcadia.io"
+  },
+  "skills": [
+    "./"
+  ]
+}

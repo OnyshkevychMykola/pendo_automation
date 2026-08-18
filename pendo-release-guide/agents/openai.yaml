@@ -1,0 +1,65 @@
+# Agent-runtime manifest for running this skill on an OpenAI-compatible agent
+# framework (Assistants-style / tool-calling agent loop).
+#
+# NOTE: no existing convention for a per-runtime agent manifest was found anywhere in the
+# legacy project or this environment, so the exact keys below are inferred rather than
+# copied from a known schema. Treat this as a starting point and rename/restructure keys
+# to match whatever your actual OpenAI-compatible runtime expects — the content that
+# matters (what this skill needs from the runtime, and the hard safety constraints) is
+# accurate; the YAML shape around it is not authoritative.
+
+name: pendo-release-guide
+description: >
+  Creates a Draft Pendo release-note guide by cloning a configured template and
+  populating it from user-supplied guide content. Operates entirely through the visible
+  Pendo web UI in a real browser — never Pendo's API.
+entrypoint: ../SKILL.md
+
+model:
+  # A model capable of multi-step tool use with reliable instruction-following is
+  # required — this workflow involves conditional branching (media-type shaping,
+  # existing-guide checks, verification) that a purely reactive/single-shot model
+  # handles poorly. No specific OpenAI model is mandated; pick your runtime's current
+  # reasoning-capable tool-use model.
+  minimum_capability: tool-use-with-multistep-reasoning
+
+tools_required:
+  browser:
+    description: >
+      Interactive control of a real Chromium-based browser already signed into Pendo
+      (click, type, navigate, read visible text/DOM state, upload a local file into a
+      file input). Must expose enough state to confirm what is actually on screen before
+      acting — this skill never acts "blind" on assumed DOM structure.
+    destructive_actions_require_confirmation: true
+  file_read:
+    description: Read pendo-config.yaml, a guide-content JSON file, and reference docs.
+  shell_exec:
+    description: >
+      Run the single bundled helper (scripts/validate_guide_content.mjs) via Node.js.
+      No other code execution is required by this skill.
+    allowlist:
+      - "node scripts/validate_guide_content.mjs *"
+
+inputs:
+  - name: pendo_config_path
+    description: Path to references/pendo-config.yaml (or a copy with real values filled in).
+    required: true
+  - name: guide_content
+    description: Path to a guide-content JSON file, or the content supplied inline.
+    required: true
+
+safety:
+  draft_only: true # never publish/activate a guide; see SKILL.md "Draft-only rule"
+  no_destructive_actions_on_ambiguous_ui: true
+  no_credentials_in_config_or_prompts: true
+  stop_conditions:
+    - template fingerprint mismatch (see references/pendo-workflow.md step 1)
+    - authentication redirect encountered more than once
+    - any control that could Publish/Activate/Delete/Archive/Disable something and whose
+      identity is not confidently confirmed
+
+references:
+  workflow: ../references/pendo-workflow.md
+  config_schema: ../references/pendo-config.yaml
+  content_schema: ../references/guide-content.md
+  troubleshooting: ../references/troubleshooting.md

@@ -1,0 +1,127 @@
+# Reusable Pendo site/application configuration for the pendo-release-guide skill.
+#
+# This is reusable Pendo *knowledge* (which app, which template, which page, what the
+# template must look like) — it does not contain any release-specific guide content and
+# it does not contain any secrets. Guide content is supplied separately per run (see
+# references/guide-content.md).
+#
+# Derived 1:1 from the legacy project's pendo-automation.config.json (schema in
+# src/config/config-schema.ts) and src/pendo/ui-contract.ts. Filled in here with this
+# environment's real values (same values as the local, gitignored
+# pendo-automation.config.json) rather than placeholders.
+#
+# This file now contains a real Pendo subscription/site ID, app name, and template guide
+# ID. The legacy project deliberately kept this data out of version control
+# (pendo-automation.config.json is gitignored) precisely because it's environment-
+# specific. If this skill directory is committed or shared beyond this environment,
+# apply the same treatment: keep real identifiers out of the shared/public copy (revert
+# `apps.hub` to placeholders, or gitignore this file specifically) and let each
+# environment supply its own filled-in copy.
+
+schemaVersion: 1
+
+# Connection-level settings that apply across all apps in this Pendo subscription.
+# (src/config/config-schema.ts: region, baseUrl)
+pendo:
+  region: us # Only "us" is supported today — matches the legacy config's single literal value.
+  baseUrl: "https://app.pendo.io"
+
+# One entry per Pendo application ("app" as shown in the guide details subtitle) this
+# skill is allowed to create guides in. Add more keys under `apps` if you manage guides
+# for more than one application.
+apps:
+  hub: # short reference key — pick any readable slug; used by `defaults.app` below
+    # Exact app name as Pendo displays it in the guide details subtitle.
+    # (src/config/config-schema.ts: targetAppName)
+    appName: "Hub"
+
+    # Pendo pages this app's guides may target. Add more entries if you target more
+    # than one page. (src/config/config-schema.ts: expectedPageName)
+    pages:
+      default:
+        name: "Conversational Analytics"
+
+    # Template guide(s) that new release guides are cloned from.
+    # (src/config/config-schema.ts: templateGuideName, templateGuideUrl, templateVersion;
+    # src/pendo/ui-contract.ts: UI_CONTRACT)
+    templates:
+      release_notes:
+        # Exact name of the template guide in Pendo. Used both to resolve the template
+        # and as a fingerprint check before every clone.
+        name: "Release Notes Template"
+
+        # Direct URL to the template guide's details page. Required — the skill does not
+        # search for the template by name alone (the legacy tool required this too; see
+        # TemplateInspector.resolveTemplateUrl, which errors if unset).
+        url: "https://app.pendo.io/s/5718259445137408/guides/YkmddvmB8yfvbst5ihfgEsZuZrQ"
+
+        # Bump this yourself whenever you intentionally change the template's structure,
+        # so stale assumptions can be detected. Phase 1 has no persisted run journal to
+        # compare this against (see references/troubleshooting.md), but keep it accurate —
+        # a later phase may reintroduce that comparison.
+        version: 1
+
+        # The template must be in this status before it is safe to clone from.
+        status: "Draft"
+
+        # Structural contract the template must match exactly before every clone. If the
+        # live template drifts from this, stop — do not clone from a modified template.
+        # This is the single biggest safety net against a human accidentally editing the
+        # shared template out from under an automated run.
+        structure:
+          stepCount: 5
+          # 1-based order of the template's steps as they appear in the step preview.
+          # Master steps are duplicated or deleted (never edited by "Add step") to match
+          # the guide content's features — see references/pendo-workflow.md.
+          steps:
+            - position: 1
+              role: intro # always kept; content replaced every run
+            - position: 2
+              role: master_feature # text-only feature master (title + body, no media)
+              mediaType: none
+            - position: 3
+              role: master_image # feature master with an image block
+              mediaType: image
+            - position: 4
+              role: master_video # feature master with a video block (provider preset to Loom)
+              mediaType: video
+            - position: 5
+              role: outro # always kept; content replaced every run
+          # Exact placeholder text found in a never-modified template. Used two ways:
+          #   1. Before cloning, to confirm the template hasn't drifted.
+          #   2. After saving, to confirm no placeholder text was left behind by mistake.
+          placeholders:
+            introTitle: "Welcome to Conversation Analytics!"
+            introBody: "Here what changed for the last release:"
+            featureTitle: "Feature Title"
+            featureBody: "Feature Description."
+            outroTitle: "You're all set!"
+            outroBody: "You've seen the main changes. Start exploring Conversational Analytics and come back anytime you need help."
+
+    # Naming convention for guides created by this skill.
+    # (src/manifest/name-generator.ts: generateGuideName)
+    guideNaming:
+      pattern: "[AUTO][{releaseId}] {guideName}"
+
+    # Which template/page this app uses when a run doesn't say otherwise.
+    defaults:
+      template: release_notes
+      page: default
+
+# Which app to use when a run doesn't specify one. Remove this (and require the caller
+# to always name an app) once more than one app is configured, to avoid silently
+# targeting the wrong one.
+defaults:
+  app: hub
+
+# Advisory only — informational carryover from the legacy Playwright launch config
+# (src/config/config-schema.ts: browser). The skill drives Pendo through whichever
+# browser/automation tool the agent runtime provides, which owns its own launch
+# settings; nothing in this skill reads these values programmatically. Kept here only
+# because Pendo's guide editor layout is viewport-sensitive — if your browser tool lets
+# you choose a viewport, matching this one avoids layout differences from what the
+# legacy tool was validated against.
+runtimeHints:
+  recommendedViewport:
+    width: 1440
+    height: 900

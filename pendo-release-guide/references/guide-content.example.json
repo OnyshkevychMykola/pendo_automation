@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "releaseId": "2026-08-example-release",
+  "guideName": "August 2026 Product Updates",
+  "intro": {
+    "title": "What is new in August",
+    "description": "Explore the latest improvements available in this release."
+  },
+  "features": [
+    {
+      "id": "clearer-export-status",
+      "title": "Clearer export status",
+      "description": "Export progress and completion messages are now easier to understand.",
+      "media": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "faster-worklist-filters",
+      "title": "Faster worklist filters",
+      "description": "Worklist filters now respond more quickly and preserve your most recent selections.",
+      "media": {
+        "type": "image",
+        "path": "./assets/worklist-filters.png",
+        "alt": "Updated worklist filter controls"
+      }
+    },
+    {
+      "id": "product-walkthrough",
+      "title": "Watch what's new",
+      "description": "A short walkthrough of this release's highlights.",
+      "media": {
+        "type": "video",
+        "url": "https://www.loom.com/share/replace-with-your-video-id",
+        "title": "August 2026 walkthrough"
+      }
+    }
+  ],
+  "outro": {
+    "title": "Ready to explore",
+    "description": "Open the product to try the new improvements."
+  }
+}
