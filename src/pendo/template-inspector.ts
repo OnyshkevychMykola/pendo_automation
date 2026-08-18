@@ -45,6 +45,10 @@ export class TemplateInspector {
   async verifyFingerprint(templateUrl: string): Promise<TemplateFingerprintResult> {
     await this.page.goto(templateUrl, { waitUntil: 'domcontentloaded' });
     await this.page.locator(SELECTORS.details.guideName).waitFor({ timeout: 15000 });
+    // The step-preview carousel renders asynchronously after the page header (separate data
+    // fetch) — without this wait, getDetails() can run while it's still empty and read
+    // stepCount as 0 even though the template genuinely has steps.
+    await this.page.locator(SELECTORS.details.stepPreview).first().waitFor({ timeout: 15000 }).catch(() => {});
 
     const { name, status, appName, stepCount } = await this.detailsPage.getDetails();
 
